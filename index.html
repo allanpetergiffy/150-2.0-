@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The 150-Day Matrix</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { 
+            background-color: #060814; 
+            color: #f8fafc; 
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        }
+        .progress-bar-fill { transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        .task-checkbox:checked + div { color: #64748b; text-decoration: line-through; }
+        .view-panel { display: none; }
+        .view-panel.active { display: block; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 4px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-6 md:p-12 max-w-2xl mx-auto">
+
+    <!-- Clickable Progress Bar Wrapper -->
+    <header class="w-full space-y-4 mb-8">
+        <button onclick="switchView('analytics')" class="w-full block text-left group focus:outline-none">
+            <div class="flex justify-between items-center text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 group-hover:text-slate-400 transition-colors">
+                <span>Overall Path Completion <span class="text-amber-500/60 lowercase font-normal">(click to view tracks)</span></span>
+                <span id="progress-percentage" class="text-amber-500 font-bold">0%</span>
+            </div>
+            <div class="h-2 w-full bg-slate-900 border border-slate-800/60 rounded-full overflow-hidden group-hover:border-slate-700 transition-colors">
+                <div id="progress-bar" class="progress-bar-fill h-full bg-gradient-to-r from-amber-600 to-amber-500 w-0"></div>
+            </div>
+        </button>
+
+        <!-- Dynamic Navigation Tabs -->
+        <div class="flex border-b border-slate-900 pt-2 text-[11px] font-bold tracking-wider uppercase">
+            <button id="btn-view-focus" onclick="switchView('focus')" class="pb-2 border-b-2 border-amber-500 text-amber-500 mr-6 transition-all">☀️ Today's Focus</button>
+            <button id="btn-view-matrix" onclick="switchView('matrix')" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-300 transition-all">📅 150-Day Matrix</button>
+            <button id="btn-view-analytics" onclick="switchView('analytics')" class="pb-2 border-b-2 border-transparent text-slate-500 hover:text-slate-300 transition-all hidden sm:block">📊 Track Analytics</button>
+        </div>
+    </header>
+
+    <!-- Page 1: Daily Focus View Workspace -->
+    <main id="view-focus" class="view-panel active w-full flex-grow flex flex-col justify-center">
+        <div class="border border-slate-900 bg-slate-950/40 p-6 md:p-8 rounded-2xl space-y-6 shadow-xl">
+            <div class="flex justify-between items-baseline border-b border-slate-900 pb-3">
+                <h2 id="focus-day-title" class="text-lg font-bold text-slate-100 font-serif">DAY 1</h2>
+                <span id="track-tag" class="text-[9px] uppercase tracking-wider px-2 py-0.5 rounded bg-slate-900 text-slate-400 font-sans">Gospel Track</span>
+            </div>
+
+            <div class="space-y-5 text-xs">
+                <!-- MORNING TRACK -->
+                <div class="space-y-3">
+                    <label class="flex items-start gap-3.5 cursor-pointer select-none group">
+                        <input type="checkbox" id="tick-scr" onclick="handleTaskToggle()" class="task-checkbox mt-0.5 rounded border-slate-800 bg-slate-900 text-amber-500 focus:ring-0 w-4 h-4 transition-all">
+                        <div class="transition-colors duration-200">
+                            <span class="text-[9px] font-black text-amber-500/80 block uppercase tracking-wide">☀️ Morning Word</span>
+                            <span id="text-scr" class="leading-relaxed">...</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3.5 cursor-pointer select-none group">
+                        <input type="checkbox" id="tick-imit" onclick="handleTaskToggle()" class="task-checkbox mt-0.5 rounded border-slate-800 bg-slate-900 text-sky-500 focus:ring-0 w-4 h-4 transition-all">
+                        <div class="transition-colors duration-200">
+                            <span class="text-[9px] font-black text-sky-400 block uppercase tracking-wide">📖 Morning Devotional</span>
+                            <span id="text-imit" class="leading-relaxed">...</span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- EVENING TRACK -->
+                <div class="space-y-3 pt-2 border-t border-slate-950">
+                    <label class="flex items-start gap-3.5 cursor-pointer select-none group">
+                        <input type="checkbox" id="tick-ccc" onclick="handleTaskToggle()" class="task-checkbox mt-0.5 rounded border-slate-800 bg-slate-900 text-emerald-500 focus:ring-0 w-4 h-4 transition-all">
+                        <div class="transition-colors duration-200">
+                            <span class="text-[9px] font-black text-emerald-400 block uppercase tracking-wide">🌙 Dogmatic Syllabus</span>
+                            <span id="text-ccc" class="leading-relaxed">...</span>
+                        </div>
+                    </label>
+
+                    <label class="flex items-start gap-3.5 cursor-pointer select-none group">
+                        <input type="checkbox" id="tick-com" onclick="handleTaskToggle()" class="task-checkbox mt-0.5 rounded border-slate-800 bg-slate-900 text-purple-500 focus:ring-0 w-4 h-4 transition-all">
+                        <div class="transition-colors duration-200">
+                            <span class="text-[9px] font-black text-purple-400 block uppercase tracking-wide">📜 Commentary / Study</span>
+                            <span id="text-com" class="leading-relaxed">...</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Page 2: Macro 150-Day Matrix Syllabus View -->
+    <main id="view-matrix" class="view-panel w-full flex-grow">
+        <div class="border border-slate-900 bg-slate-950/20 p-4 rounded-2xl max-h-[500px] overflow-y-auto space-y-6">
+            <div id="matrix-months-container" class="space-y-6"></div>
+        </div>
+    </main>
+
+    <!-- Page 3: Track Analytics Dashboard Page -->
+    <main id="view-analytics" class="view-panel w-full flex-grow">
+        <div class="border border-slate-900 bg-slate-950/40 p-6 rounded-2xl space-y-6 shadow-xl">
+            <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest border-b border-slate-900 pb-2">Track Metrics Overview</h2>
+            
+            <div class="space-y-4 text-xs">
+                <!-- Gospel Tracker Metric Bar -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between font-bold"><span class="text-amber-500">✝️ Gospels Track</span><span id="an-gospel-pct">0%</span></div>
+                    <div class="h-1.5 bg-slate-900 border border-slate-800/80 rounded-full overflow-hidden"><div id="an-gospel-bar" class="progress-bar-fill h-full bg-amber-500 w-0"></div></div>
+                </div>
+
+                <!-- Epistle Tracker Metric Bar -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between font-bold"><span class="text-indigo-400">✉️ Epistles Track</span><span id="an-epistle-pct">0%</span></div>
+                    <div class="h-1.5 bg-slate-900 border border-slate-800/80 rounded-full overflow-hidden"><div id="an-epistle-bar" class="progress-bar-fill h-full bg-indigo-500 w-0"></div></div>
+                </div>
+
+                <!-- CCC Tracker Metric Bar -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between font-bold"><span class="text-emerald-400">📜 Catechism (CCC) Path</span><span id="an-ccc-pct">0%</span></div>
+                    <div class="h-1.5 bg-slate-900 border border-slate-800/80 rounded-full overflow-hidden"><div id="an-ccc-bar" class="progress-bar-fill h-full bg-emerald-500 w-0"></div></div>
+                </div>
+
+                <!-- Imitation Tracker Metric Bar -->
+                <div class="space-y-1.5">
+                    <div class="flex justify-between font-bold"><span class="text-sky-400">🛡️ Imitation of Christ</span><span id="an-imitation-pct">0%</span></div>
+                    <div class="h-1.5 bg-slate-900 border border-slate-800/80 rounded-full overflow-hidden"><div id="an-imitation-bar" class="progress-bar-fill h-full bg-sky-500 w-0"></div></div>
+                </div>
+            </div>
+            
+            <div class="pt-2">
+                <button onclick="switchView('focus')" class="text-[10px] font-bold text-slate-400 hover:text-slate-200 transition-colors uppercase tracking-wider">← Return to Focus Mode</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Global System Engine Reset Trigger -->
+    <footer class="w-full pt-8 flex justify-center">
+        <button onclick="resetSystemProgress()" class="text-[10px] font-bold text-rose-400/50 hover:text-rose-400 transition-colors uppercase tracking-wider">Reset Engine Progress</button>
+    </footer>
+
+    <script>
+        const syllabusMeta = [
+            { name: "Month 1: Creed & Origin", base: 1, step: 19 },
+            { name: "Month 2: Mystery of Salvation", base: 568, step: 17 },
+            { name: "Month 3: Sacramental Reality", base: 1066, step: 21 },
+            { name: "Month 4: Moral Imperatives", base: 1691, step: 29 },
+            { name: "Month 5: Sovereign Prayer", base: 2558, step: 11 }
+        ];
+
+        function getImitationChapter(day) {
+            if (day <= 25) return `Imitation: Bk 1 Ch ${day}`;
+            if (day <= 37) return `Imitation: Bk 2 Ch ${day - 25}`;
+            if (day <= 96) return `Imitation: Bk 3 Ch ${day - 37}`;
+            if (day <= 114) return `Imitation: Bk 4 Ch ${day - 96}`;
+            return "Imitation: Reflection Focus";
+        }
+
+        function getScheduleData(globalDay) {
+            let trackingType = ""; let morningScripture = ""; let eveningStudyText = "";
+            if (globalDay <= 30) {
+                trackingType = "Gospel";
+                let matChapters = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24","25","26 (Pt I)","26 (Pt II)","27 (Pt I)","27 (Pt II)","28"];
+                morningScripture = `Matthew Ch. ${matChapters[globalDay - 1]}`;
+                eveningStudyText = `Catena: Matthew Ch. ${matChapters[globalDay - 1]}`;
+            } else if (globalDay <= 40) {
+                trackingType = "Epistle"; let dayOffset = globalDay - 31;
+                morningScripture = dayOffset <= 7 ? `Romans Ch. ${dayOffset * 2 + 1}–${dayOffset * 2 + 2}` : `Galatians Ch. ${(dayOffset - 8) * 3 + 1}–${(dayOffset - 8) * 3 + 3}`;
+                eveningStudyText = "Spiritual Book Reading";
+            } else if (globalDay <= 56) {
+                trackingType = "Gospel"; let dayOffset = globalDay - 41 + 1;
+                morningScripture = `Mark Ch. ${dayOffset}`; eveningStudyText = `Catena: Mark Ch. ${dayOffset}`;
+            } else if (globalDay <= 65) {
+                trackingType = "Epistle"; let dayOffset = globalDay - 57;
+                morningScripture = dayOffset <= 5 ? `1 Cor Ch. ${Math.min(16, dayOffset * 3 + 1)}–${Math.min(16, dayOffset * 3 + 3)}` : `2 Cor Ch. ${Math.min(13, (dayOffset - 6) * 4 + 1)}–${Math.min(13, (dayOffset - 6) * 4 + 4)}`;
+                eveningStudyText = "Spiritual Book Reading";
+            } else if (globalDay <= 91) {
+                trackingType = "Gospel";
+                let lukeChapters = ["1 (Pt I)","1 (Pt II)","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22 (Pt I)","22 (Pt II)","23","24"];
+                morningScripture = `Luke Ch. ${lukeChapters[globalDay - 66]}`; eveningStudyText = `Catena: Luke Ch. ${lukeChapters[globalDay - 66]}`;
+            } else if (globalDay <= 103) {
+                trackingType = "Epistle"; let dayOffset = globalDay - 92;
+                if (dayOffset <= 1) morningScripture = `Ephesians Ch. ${dayOffset * 3 + 1}–${dayOffset * 3 + 3}`;
+                else if (dayOffset === 2) morningScripture = `Philippians Ch. 1–4`;
+                else if (dayOffset === 3) morningScripture = `Colossians Ch. 1–4`;
+                else if (dayOffset <= 5) morningScripture = `${dayOffset === 4 ? "1" : "2"} Thess Ch. 1–5`;
+                else if (dayOffset <= 7) morningScripture = `${dayOffset === 6 ? "1" : "2"} Timothy Ch. 1–6`;
+                else if (dayOffset === 8) morningScripture = `Titus & Philemon`;
+                else morningScripture = `Hebrews Ch. ${Math.min(13, (dayOffset - 9) * 4 + 1)}–${Math.min(13, (dayOffset - 9) * 4 + 4)}`;
+                eveningStudyText = "Spiritual Book Reading";
+            } else if (globalDay <= 126) {
+                trackingType = "Gospel";
+                let johnChapters = ["1","2","3","4","5","6 (Pt I)","6 (Pt II)","7","8","9","10","11","12","13 (Pt I)","13 (Pt II)","14","15","16","17","18","19","20","21"];
+                morningScripture = `John Ch. ${johnChapters[globalDay - 104]}`; eveningStudyText = `Catena: John Ch. ${johnChapters[globalDay - 104]}`;
+            } else {
+                trackingType = "Epistle"; let dayOffset = globalDay - 127;
+                if (dayOffset <= 1) morningScripture = `James Ch. ${dayOffset * 2.5 + 1}–${Math.min(5, dayOffset * 2.5 + 3)}`;
+                else if (dayOffset <= 3) morningScripture = `1 Peter Ch. ${(dayOffset - 2) * 2.5 + 1}–${Math.min(5, (dayOffset - 2) * 2.5 + 3)}`;
+                else if (dayOffset === 4) morningScripture = `2 Peter Ch. 1–3`;
+                else if (dayOffset === 5) morningScripture = `1-3 John & Jude`;
+                else morningScripture = `Revelation Ch. ${Math.min(22, (dayOffset - 6) * 1 + 1)}`;
+                eveningStudyText = "Spiritual Book Reading";
+            }
+            return { trackingType, morningScripture, eveningStudyText, dailyPsalm: `Psalm ${globalDay}` };
+        }
+
+        function getTodayString() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        let appState = {
+            currentDay: 1, lastDateString: "", dayComplete: false,
+            ticks: { scr: false, imit: false, ccc: false, com: false }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadEngineState();
+            evaluateDayRollover();
+            renderActiveWorkspace();
+            updateProgressMetrics();
+        });
+
+        function loadEngineState() {
+            const stored = localStorage.getItem('matrix_engine_v14');
+            if (stored) appState = JSON.parse(stored);
+        }
+
+        function saveEngineState() {
+            localStorage.setItem('matrix_engine_v14', JSON.stringify(appState));
+        }
+
+        function switchView(viewName) {
+            document.querySelectorAll('.view-panel').forEach(panel => panel.classList.remove('active'));
+            document.getElementById(`view-${viewName}`).classList.add('active');
+
+            const focusBtn = document.getElementById('btn-view-focus');
+            const matrixBtn = document.getElementById('btn-view-matrix');
+            const analyticsBtn = document.getElementById('btn-view-analytics');
+            
+            // Manage UI high contrast line tags
+            focusBtn.className = "pb-2 border-b-2 " + (viewName === 'focus' ? "border-amber-500 text-amber-500" : "border-transparent text-slate-500 hover:text-slate-300") + " mr-6 transition-all";
+            matrixBtn.className = "pb-2 border-b-2 " + (viewName === 'matrix' ? "border-amber-500 text-amber-500" : "border-transparent text-slate-500 hover:text-slate-300") + " mr-6 transition-all";
+            analyticsBtn.className = "pb-2 border-b-2 " + (viewName === 'analytics' ? "border-amber-500 text-amber-500" : "border-transparent text-slate-500 hover:text-slate-300") + " transition-all hidden sm:block";
+
+            if (viewName === 'matrix') renderMatrixOverviewPage();
+            if (viewName === 'analytics') calculateTrackMetrics();
+        }
+
+        function evaluateDayRollover() {
+            const today = getTodayString();
+            if (appState.lastDateString && appState.lastDateString !== today) {
+                if (appState.dayComplete && appState.currentDay < 150) {
+                    appState.currentDay += 1;
+                    appState.ticks = { scr: false, imit: false, ccc: false, com: false };
+                    appState.dayComplete = false;
+                }
+            }
+            appState.lastDateString = today;
+            saveEngineState();
+        }
+
+        function renderActiveWorkspace() {
+            const day = appState.currentDay;
+            const data = getScheduleData(day);
+
+            const currentMonthIdx = Math.floor((day - 1) / 30);
+            const relativeDayIdx = (day - 1) % 30;
+            const mMeta = syllabusMeta[currentMonthIdx];
+            const cccStart = mMeta.base + (relativeDayIdx * mMeta.step);
+            const cccEnd = Math.min(2865, cccStart + mMeta.step - 1);
+
+            document.getElementById('focus-day-title').innerText = `DAY ${day}`;
+            document.getElementById('track-tag').innerText = `${data.trackingType} Track`;
+
+            document.getElementById('text-scr').innerHTML = `${data.morningScripture} & <span class="text-slate-500">${data.dailyPsalm}</span>`;
+            document.getElementById('text-imit').innerText = getImitationChapter(day);
+            document.getElementById('text-ccc').innerText = `CCC Paragraphs ${cccStart} – ${cccEnd}`;
+            document.getElementById('text-com').innerText = data.eveningStudyText;
+
+            document.getElementById('tick-scr').checked = appState.ticks.scr;
+            document.getElementById('tick-imit').checked = appState.ticks.imit;
+            document.getElementById('tick-ccc').checked = appState.ticks.ccc;
+            document.getElementById('tick-com').checked = appState.ticks.com;
+        }
+
+        function handleTaskToggle() {
+            appState.ticks.scr = document.getElementById('tick-scr').checked;
+            appState.ticks.imit = document.getElementById('tick-imit').checked;
+            appState.ticks.ccc = document.getElementById('tick-ccc').checked;
+            appState.ticks.com = document.getElementById('tick-com').checked;
+
+            appState.dayComplete = (appState.ticks.scr && appState.ticks.imit && appState.ticks.ccc && appState.ticks.com);
+            
+            saveEngineState();
+            updateProgressMetrics();
+        }
+
+        function updateProgressMetrics() {
+            const baseCompletedDays = appState.dayComplete ? appState.currentDay : appState.currentDay - 1;
+            const rawPercentage = Math.round((baseCompletedDays / 150) * 100);
+            
+            document.getElementById('progress-percentage').innerText = `${rawPercentage}%`;
+            document.getElementById('progress-bar').style.width = `${rawPercentage}%`;
+        }
+
+        function calculateTrackMetrics() {
+            let totalGospel = 0, doneGospel = 0;
+            let totalEpistle = 0, doneEpistle = 0;
+            let doneCCC = 0, doneImitation = 0;
+
+            for (let day = 1; day <= 150; day++) {
+                const data = getScheduleData(day);
+                const isPassed = day < appState.currentDay;
+                const isCurrent = day === appState.currentDay;
+
+                // Evaluate scripture track paths
+                if (data.trackingType === "Gospel") {
+                    totalGospel++;
+                    if (isPassed || (isCurrent && appState.ticks.scr)) doneGospel++;
+                } else {
+                    totalEpistle++;
+                    if (isPassed || (isCurrent && appState.ticks.scr)) doneEpistle++;
+                }
+
+                // Evaluate standard items
+                if (isPassed || (isCurrent && appState.ticks.ccc)) doneCCC++;
+                if (isPassed || (isCurrent && appState.ticks.imit)) doneImitation++;
+            }
+
+            const gPct = Math.round((doneGospel / totalGospel) * 100) || 0;
+            const ePct = Math.round((doneEpistle / totalEpistle) * 100) || 0;
+            const cPct = Math.round((doneCCC / 150) * 100) || 0;
+            const iPct = Math.round((doneImitation / 150) * 100) || 0;
+
+            document.getElementById('an-gospel-pct').innerText = `${gPct}%`;
+            document.getElementById('an-gospel-bar').style.width = `${gPct}%`;
+
+            document.getElementById('an-epistle-pct').innerText = `${ePct}%`;
+            document.getElementById('an-epistle-bar').style.width = `${ePct}%`;
+
+            document.getElementById('an-ccc-pct').innerText = `${cPct}%`;
+            document.getElementById('an-ccc-bar').style.width = `${cPct}%`;
+
+            document.getElementById('an-imitation-pct').innerText = `${iPct}%`;
+            document.getElementById('an-imitation-bar').style.width = `${iPct}%`;
+        }
+
+        function renderMatrixOverviewPage() {
+            const targetContainer = document.getElementById('matrix-months-container');
+            targetContainer.innerHTML = '';
+
+            syllabusMeta.forEach((mMeta, mIdx) => {
+                const monthBlock = document.createElement('div');
+                monthBlock.className = "space-y-2";
+                monthBlock.innerHTML = `<h3 class="text-[10px] font-black text-slate-600 uppercase tracking-widest border-b border-slate-900 pb-1 mb-2">${mMeta.name}</h3>`;
+                
+                const grid = document.createElement('div');
+                grid.className = "grid grid-cols-1 gap-2";
+
+                for (let d = 1; d <= 30; d++) {
+                    const globalDay = (mIdx * 30) + d;
+                    const data = getScheduleData(globalDay);
+                    const cccStart = mMeta.base + ((d - 1) * mMeta.step);
+                    const cccEnd = Math.min(2865, cccStart + mMeta.step - 1);
+
+                    let itemClass = "p-3 border rounded-xl flex flex-col gap-1 text-[11px] ";
+                    if (globalDay < appState.currentDay) itemClass += "border-slate-900 bg-slate-950/20 opacity-40";
+                    else if (globalDay === appState.currentDay) itemClass += "border-amber-500/40 bg-amber-500/[0.02]";
+                    else itemClass += "border-slate-950 bg-slate-950/10";
+
+                    grid.innerHTML += `
+                        <div class="${itemClass}">
+                            <div class="flex justify-between font-bold text-slate-400 mb-1">
+                                <span>Day ${globalDay} <span class="text-[9px] font-normal text-slate-600">(${data.trackingType})</span></span>
+                                ${globalDay === appState.currentDay ? '<span class="text-[9px] text-amber-500 font-bold uppercase tracking-wide">Active Today</span>' : ''}
+                            </div>
+                            <div class="text-slate-500 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-0.5 leading-relaxed">
+                                <div><span class="text-slate-600 font-bold">☀️ AM:</span> ${data.morningScripture} &amp; ${getImitationChapter(globalDay)}</div>
+                                <div><span class="text-slate-600 font-bold">🌙 PM:</span> CCC ${cccStart}-${cccEnd}</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                monthBlock.appendChild(grid);
+                targetContainer.appendChild(monthBlock);
+            });
+        }
+
+        function resetSystemProgress() {
+            if (confirm("Reset current sequence back to Day 1?")) {
+                appState = {
+                    currentDay: 1, lastDateString: getTodayString(), dayComplete: false,
+                    ticks: { scr: false, imit: false, ccc: false, com: false }
+                };
+                saveEngineState();
+                renderActiveWorkspace();
+                updateProgressMetrics();
+                switchView('focus');
+            }
+        }
+    </script>
+</body>
+          </html>
